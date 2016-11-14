@@ -79,8 +79,13 @@ void Synch::Loop()
       hBJet2Phi->Fill(bphi_2);
       hBJet2Eta->Fill(beta_2);
       //MET
-      hMET->Fill(met);
-      hMETphi->Fill(metphi);
+      std::string name(fChain->GetTree()->GetName());
+      if(name=="tree") {
+      	hMET->Fill(mvamet);
+      	hMETphi->Fill(mvametphi);
+      	} else {
+      	hMET->Fill(met);
+      	hMETphi->Fill(metphi);}
       hMVAMET->Fill(mvamet);
       hMVAMETphi->Fill(mvametphi);
       hMVACov00->Fill(mvacov00);

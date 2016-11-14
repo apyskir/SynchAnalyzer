@@ -132,9 +132,9 @@ void draw1(TH1F *hWAW, TH1F *hVienna, bool abs){
 
 void drawHistos(){
 	
-	std::string sample1 = "WAW", sample2 = "CERNVBF";
+	std::string sample1 = "WAW", sample2 = "DESYVBF";
 	//those variables decide if you want to draw pictures and if you want to investigate the sync trees by reading single events
-	bool draw = 1, investigate = 0;
+	bool draw = 0, investigate = 1;
 	
 	//second argument of Synch constructor should not contain "_"
 	
@@ -191,7 +191,7 @@ void drawHistos(){
 	}
 	
 	if(sample2 == "DESYVBF"){
-		f2 = new TFile("/scratch/apyskir/Data/Synch/Htt_mt_VBF_SM_sync_v1.root");
+		f2 = new TFile("/scratch/apyskir/Data/Synch/Htt_mt_VBF_SM_sync_v6.root");
 		t2 = (TTree*)f2->Get("TauCheck");
 		s2 = new Synch(t2, sample2);
 	}
@@ -217,6 +217,12 @@ void drawHistos(){
 	if(sample2 == "KIT"){
 		f2 = new TFile("/scratch/apyskir/Data/Synch/SUSYGluGluToHToTauTauM160_mt_RunIISpring16MiniAODv2_13TeV_MINIAOD.root");
 		t2 = (TTree*)f2->Get("mt/ntuple");
+		s2 = new Synch(t2, sample2);
+	}
+	
+	if(sample2 == "KITVBF"){
+		f2 = new TFile("/scratch/apyskir/Data/Synch/Htt_mt_VBFHToTauTauM125_v2.root");
+		t2 = (TTree*)f2->Get("ntuple");
 		s2 = new Synch(t2, sample2);
 	}
 	
@@ -299,8 +305,6 @@ void drawHistos(){
 			draw1(s1->hMETphi, s2->hMETphi, 0);
 			draw1(s1->hMVAMET, s2->hMVAMET, 0);
 			draw1(s1->hMVAMETphi, s2->hMVAMETphi, 0);
-			//draw1(s1->hMVAMET, s2->hMET, 0);
-			//draw1(s1->hMVAMETphi, s2->hMETphi, 0);
 			draw1(s1->hMVACov00, s2->hMVACov00, 1);
 			draw1(s1->hMVACov01, s2->hMVACov01, 1);
 			draw1(s1->hMVACov10, s2->hMVACov10, 1);
@@ -524,25 +528,34 @@ void drawHistos(){
 		}
 	}
 	
-	Int_t nevt = 0;
+	Int_t nevt = 0, nevt2 = 0, nevt3 = 0;
 	Bool_t is2 = 0;
 	if(investigate){
 	
-		for(Int_t i = 0; i<s2c->fChain->GetEntriesFast(); i++){
-			s2c->b_evt->GetEntry(i);
-			s2c->b_met->GetEntry(i);
+		for(Int_t i = 0; i<10000; i++){//s2->fChain->GetEntriesFast(); i++){
+			s2->b_evt->GetEntry(i);
+			s2->b_met->GetEntry(i);
 			is2 = false;
 			for(Int_t j = 0; j<s1->fChain->GetEntriesFast(); j++){
 				s1->b_evt->GetEntry(j);
-				if(s1->evt == s2c->evt){
-					s1->b_met->GetEntry(j);
-					if(abs(s1->met - s2c->met)>0.0001) {//std::cout<<s1->evt<<": WAW: "<<s1->met<<", CERN: "<<s2c->met<<std::endl; 
-					nevt++;}
+				if(s1->evt == s2->evt){
+					s1->b_mvamet->GetEntry(j);
+					s1->b_njetspt20->GetEntry(j);
+					s2->b_njetspt20->GetEntry(i);
+					//std::cout<<s1->njetspt20<<" "<<s2->njetspt20<<std::endl;
+					//if(s1->njetspt20 == 0 && s2->njetspt20 == 0) {nevt++;}
+					if(abs(s1->mvamet - s2->met)>0.0001) {//std::cout<<s1->evt<<": WAW: "<<s1->met<<", CERN: "<<s2c->met<<std::endl; 
+						//nevt2++;
+						std::cout<<s1->njetspt20<<" "<<s2->njetspt20<<std::endl;
+						//if(s1->njetspt20 == 0 && s2->njetspt20 == 0) {nevt3++;}
+						//std::cout<<s1->evt<<std::endl;
+						//std::cout<<s1->mvamet<<" "<<s2->met<<std::endl;
+						}
 					}
 				}
 			//if(!is2) nevt++;
 			}
-		std::cout<<nevt<<std::endl;
+		std::cout<<nevt<<std::endl<<nevt2<<std::endl<<nevt3<<std::endl;
 		/*
 		for(Int_t i = 0; i<s1->fChain->GetEntriesFast(); i++){
 			s1->GetEntry(i);
